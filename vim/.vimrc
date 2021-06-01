@@ -7,7 +7,7 @@
 "            
 "
 " Use plug config {
-    source ~/dotFile/vim/.vimrc.plug
+    source ~/.dotFile/vim/.vimrc.plug
 " }
 
 " General {
