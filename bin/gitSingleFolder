@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# downlode single folder from github 
+# change https://github.com/lodash/lodash/tree/master/test 
+# to https://github.com/lodash/lodash/trunk/test
+# https://stackoverflow.com/questions/7106012/download-a-single-folder-or-directory-from-a-github-repo#:~:text=Step1%3A%20Input%20github%20url%20to,File%22%20button%20to%20get%20files.
+svn checkout $1

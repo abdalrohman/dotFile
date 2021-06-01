@@ -1,0 +1,37 @@
+#!/bin/bash
+
+####################################################################################################
+#Script Name	:
+# ███████╗██╗ ██████╗ ██╗     ███████╗████████╗███████╗██╗  ██╗██████╗  ██████╗ ██████╗ ████████╗
+# ██╔════╝██║██╔════╝ ██║     ██╔════╝╚══██╔══╝██╔════╝╚██╗██╔╝██╔══██╗██╔═══██╗██╔══██╗╚══██╔══╝
+# █████╗  ██║██║  ███╗██║     █████╗     ██║   █████╗   ╚███╔╝ ██████╔╝██║   ██║██████╔╝   ██║   
+# ██╔══╝  ██║██║   ██║██║     ██╔══╝     ██║   ██╔══╝   ██╔██╗ ██╔═══╝ ██║   ██║██╔══██╗   ██║   
+# ██║     ██║╚██████╔╝███████╗███████╗   ██║   ███████╗██╔╝ ██╗██║     ╚██████╔╝██║  ██║   ██║   
+# ╚═╝     ╚═╝ ╚═════╝ ╚══════╝╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝   
+                                                                              
+#Description	:Export input name to  file with all figlet fonts                                                                                                                                                                
+#Author       	:Abdalrohman alnassier                                               
+#Email         	:abdd199719@gmail.com                                          
+####################################################################################################
+
+
+if [ $(command -v figlet) ]; then
+	read -p "Enter text: " TEXT
+	OUTPUT="$TEXT.output"
+
+	for fontname in ../figlet-fonts/*.flf; do
+		figlet -f "$fontname" "${TEXT}" 
+		echo "Font name: $(basename "$fontname" .flf)"
+	done > $OUTPUT
+
+	for fontname in ../figlet-fonts/*.tlf; do
+		figlet -f "$fontname" "${TEXT}" 
+		echo "Font name: $(basename "$fontname" .tlf)"
+	done >> $OUTPUT
+else
+	sudo DEBIAN_FRONTEND=noninteractive apt install figlet
+	if [ $(command -v figlet) ]; then
+		echo ""
+		echo "\e[0;31mRun script again.\e[m"
+	fi
+fi

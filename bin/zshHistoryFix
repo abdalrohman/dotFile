@@ -1,0 +1,16 @@
+#!/usr/bin/env zsh
+
+FILE_NAME="${1}"
+BACKUP_FILE="${2}"
+
+if [[ -e $FILE_NAME ]]; then
+    echo "Rename ${FILE_NAME} to ${BACKUP_FILE}"
+    mv "${FILE_NAME}" "${BACKUP_FILE}"
+    strings "${BACKUP_FILE}" > "${FILE_NAME}"
+    fc -R "${FILE_NAME}"
+    if [[ -e $FILE_NAME ]]; then
+        rm -rvf "${BACKUP_FILE}"
+    fi 
+else 
+    echo "Usage: ${0##*/} <filename> <backupfile>"
+fi

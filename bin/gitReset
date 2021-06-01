@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+echo "Trying to checkout repos"
+find . -mindepth 1 -maxdepth 1 -type d -print -exec git -C {} checkout -f \;
+
+echo "Trying to update repos"
+find . -mindepth 1 -maxdepth 1 -type d -print -exec git -C {} pull \;
