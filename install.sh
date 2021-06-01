@@ -191,18 +191,24 @@ program_must_exist "zsh"
 program_must_exist "vim"
 program_must_exist "git"
 
-if [ -e "$HOME/.vim/autoload" ]; then
-    rm -rf $HOME/.vim/autoload
+if [ -e "$HOME/.vim/autoload/" ]; then
+    if [ -e "$HOME/.vim/autoload/.git" ]; then
+        sync_repo   "$HOME/.vim/autoload" \
+                    "$PLUG_URI" \
+                    "master" \
+                    "plug"
+    else
+        rm -rf $HOME/.vim/autoload
+        sync_repo   "$HOME/.vim/autoload" \
+                    "$PLUG_URI" \
+                    "master" \
+                    "plug"
+    fi
+else
     sync_repo   "$HOME/.vim/autoload" \
                 "$PLUG_URI" \
                 "master" \
                 "plug"
-else 
-    sync_repo   "$HOME/.vim/autoload" \
-                "$PLUG_URI" \
-                "master" \
-                "plug"
-
 fi
 
 do_backup "$HOME/.zshrc"
