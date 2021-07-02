@@ -1,35 +1,42 @@
 #!/usr/bin/env bash
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 
 export LC_MESSAGES=C
 export LANG=C
 
-app_name='dotFile'
-[ -z "$APP_PATH" ] && APP_PATH="$HOME/.dotFile"
-[ -z "$PLUG_URI" ] && PLUG_URI="https://github.com/junegunn/vim-plug.git"
-[ -z "$PROJECT_URI" ] && PROJECT_URI="https://github.com/abdalrohman/dotFile.git"
-
-disable_colors(){
-    unset ALL_OFF BOLD BLUE GREEN RED YELLOW
+# Colors
+disable_colors() {
+    unset CLR_RST CLR_BLD CLR_MAG CLR_GRN CLR_BLD_RED CLR_BLD_YLW CLR_BLD_GRN CLR_BLD_MAG
 }
 
-enable_colors(){
+enable_colors() {
     # prefer terminal safe colored and bold text when tput is supported
     if tput setaf 0 &>/dev/null; then
-        ALL_OFF="$(tput sgr0)"
-        BOLD="$(tput bold)"
-        RED="${BOLD}$(tput setaf 1)"
-        GREEN="${BOLD}$(tput setaf 2)"
-        YELLOW="${BOLD}$(tput setaf 3)"
-        BLUE="${BOLD}$(tput setaf 4)"
+        CLR_RST="$(tput sgr0)"
+        CLR_BLD="$(tput bold)"
+        CLR_GRN="$(tput setaf 2)"
+        CLR_MAG="$(tput setaf 5)"
+        CLR_BLD_RED="${CLR_BLD}$(tput setaf 1)"
+        CLR_BLD_GRN="${CLR_BLD}$(tput setaf 2)"
+        CLR_BLD_YLW="${CLR_BLD}$(tput setaf 3)"
+        CLR_BLD_MAG="${CLR_BLD}$(tput setaf 5)"
     else
-        ALL_OFF="\e[0m"
-        BOLD="\e[1m"
-        RED="${BOLD}\e[31m"
-        GREEN="${BOLD}\e[32m"
-        YELLOW="${BOLD}\e[33m"
-        BLUE="${BOLD}\e[34m"
+        CLR_RST="\e[0m"
+        CLR_BLD="\e[1m"
+        CLR_GRN="\e[32m"
+        CLR_BLD_RED="${CLR_BLD}\e[31m"
+        CLR_BLD_GRN="${CLR_BLD}\e[32m"
+        CLR_BLD_YLW="${CLR_BLD}\e[33m"
+        CLR_BLD_MAG="${CLR_BLD}\e[35m"
     fi
-    readonly ALL_OFF BOLD BLUE GREEN RED YELLOW
+    readonly CLR_RST CLR_BLD CLR_MAG CLR_GRN CLR_BLD_RED CLR_BLD_YLW CLR_BLD_GRN CLR_BLD_MAG
 }
 
 if [[ -t 2 ]]; then
@@ -38,33 +45,43 @@ else
     disable_colors
 fi
 
+# Set functions
 msg() {
-    local mesg=$1; shift
-    printf "${GREEN}==>${ALL_OFF}${BOLD} ${mesg}${ALL_OFF}\n" "$@" >&2
+    local mesg=$1
+    shift
+    printf "${CLR_BLD_MAG}${mesg}${CLR_RST}\n" "$@" >&2
 }
 
 msg2() {
-    local mesg=$1; shift
-    printf "${BLUE}  ->${ALL_OFF}${BOLD} ${mesg}${ALL_OFF}\n" "$@" >&2
-}
-
-success() {
-    local mesg=$1; shift
-    printf "${GREEN}  ->[✔]SUCCESS:${ALL_OFF}${BOLD} ${mesg}${ALL_OFF}\n" "$@" >&2
-}
-
-error() {
-    local mesg=$1; shift
-    printf "${RED}==> [✘]ERROR:${ALL_OFF}${BOLD} ${mesg}${ALL_OFF}\n" "$@" >&2
+    local val=$1
+    local mesg=$2
+    shift
+    printf "${CLR_BLD_GRN}==> ${val}${CLR_RST}${CLR_BLD} ${mesg}\n" "$@" >&2
 }
 
 warning() {
-    local mesg=$1; shift
-    printf "${YELLOW}  ->WARNING:${ALL_OFF}${BOLD} ${mesg}${ALL_OFF}\n" "$@" >&2
+    local mesg=$1
+    shift
+    printf "${CLR_BLD_YLW}[!]WARNING:${CLR_RST}${CLR_BLD} ${mesg}${CLR_RST}\n" "$@" >&2
+}
+
+success() {
+    local mesg=$1
+    shift
+    printf "${CLR_BLD_GRN}[✔]SUCCESS:${CLR_RST}${CLR_BLD} ${mesg}${CLR_RST}\n" "$@" >&2
+}
+
+error() {
+    local mesg=$1
+    shift
+    printf "${CLR_BLD_RED}[✘]ERROR:${CLR_RST}${CLR_BLD} ${mesg}${CLR_RST}\n" "$@" >&2
 }
 
 
-
+app_name='dotFile'
+[ -z "$APP_PATH" ] && APP_PATH="$HOME/.dotFile"
+[ -z "$PLUG_URI" ] && PLUG_URI="https://github.com/junegunn/vim-plug.git"
+[ -z "$PROJECT_URI" ] && PROJECT_URI="https://github.com/abdalrohman/dotFile.git"
 
 program_exists() {
     local ret='0'
@@ -84,7 +101,7 @@ program_must_exist() {
     # throw error on non-zero return value
     if [ "$?" -ne 0 ]; then
         warning "You must have '$1' installed to continue."
-        msg2 "Trying to install missing tool."
+        msg2 "Trying to:" "install missing tool."
         sudo DEBIAN_FRONTEND=noninteractive \
             apt install $1 -y
     fi
@@ -105,7 +122,7 @@ lnif() {
 
 do_backup() {
     if [ -e "$1" ] || [ -e "$2" ] || [ -e "$3" ]; then
-        msg2 "Attempting to back up your original configuration."
+        msg2 "Attempting to:" "back up your original configuration."
         today=$(date +%Y%m%d_%s)
         for i in "$1" "$2" "$3"; do
             [ -e "$i" ] && [ ! -L "$i" ] && mv -v "$i" "$i.$today";
@@ -121,7 +138,7 @@ sync_repo() {
     local repo_branch="$3"
     local repo_name="$4"
 
-    msg2 "Trying to update $repo_name"
+    msg2 "Trying to:" "update $repo_name"
 
     if [ ! -e "$repo_path" ]; then
         mkdir -p "$repo_path"
@@ -138,7 +155,7 @@ sync_repo() {
 create_symlinks() {
     local source_path="$1"
     local target_path="$2"
-    msg2 "Creat symlinks."
+    msg2 "Creat:" "symlinks."
 
     lnif "$source_path/zsh/.zshrc" "$target_path/.zshrc"
     lnif "$source_path/vim/.vimrc" "$target_path/.vimrc"
@@ -164,12 +181,15 @@ setup_plug() {
 }
 
 ############################ MAIN()
+# Check the starting time (of the real build process)
+TIME_START=$(date +%s.%N)
+
 msg "Start installation dotFile"
 echo ""
 variable_set "$HOME"
 if [ -e $HOME/.dotFile/ ]; then
     if [ -e $HOME/.dotFile/.git ]; then
-        msg2 "Trying to update dotFile"
+        msg2 "Trying to:" "update dotFile"
         sync_repo   "$HOME/.dotFile" \
                     "$PROJECT_URI" \
                     "main" \
@@ -179,7 +199,7 @@ if [ -e $HOME/.dotFile/ ]; then
         rm -rf $HOME/.dotFile
     fi
 else
-    msg2 "Trying to sync dotFile from github"
+    msg2 "Trying to:" "sync dotFile from github"
     sync_repo   "$HOME/.dotFile" \
                 "$PROJECT_URI" \
                 "main" \
@@ -217,4 +237,11 @@ create_symlinks "$APP_PATH" "$HOME"
 
 setup_plug "$APP_PATH/vim/.vimrc.plug"
 
-msg "\nSuccesfully installing $app_name."
+# Check the finishing time
+TIME_END=$(date +%s.%N)
+
+# Log those times at the end
+msg "Total time elapsed: $(echo "(${TIME_END} - ${TIME_START}) / 60" | bc) minutes ($(echo "${TIME_END} - ${TIME_START}" | bc) seconds)"
+echo -e ""
+
+exit 0
