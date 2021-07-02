@@ -20,7 +20,7 @@ export FZF_DEFAULT_OPTS='--bind "F1:toggle-preview" --preview "rougify {} 2> /de
 # Bind F1 key to toggle preview window on/off
 export FZF_CTRL_R_OPTS='--bind "F1:toggle-preview" --preview "echo {}" --preview-window down:3:hidden:wrap'
 
-export PATH=$HOME/.dotFile//bin:$PATH
+export PATH=$HOME/.dotFile/scripts:$PATH
 export PATH=$HOME/.dotFile/bin:$PATH
 
 JAVA_HOME=/usr/lib/jvm/java-8-openjdk
