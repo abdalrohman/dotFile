@@ -188,23 +188,11 @@ msg "Start installation dotFile"
 echo ""
 variable_set "$HOME"
 if [ -e $HOME/.dotFile/ ]; then
-    if [ -e $HOME/.dotFile/.git ]; then
-        msg2 "Trying to:" "update dotFile"
-        sync_repo   "$HOME/.dotFile" \
-                    "$PROJECT_URI" \
-                    "main" \
-                    "dotFile"
-        success "Update dotFile success"
-    else
-        rm -rf $HOME/.dotFile
-    fi
-else
-    msg2 "Trying to:" "sync dotFile from github"
+    rm -rf $HOME/.dotFile
     sync_repo   "$HOME/.dotFile" \
                 "$PROJECT_URI" \
                 "main" \
                 "dotFile"
-    success "Sync dotFile success"
 fi
 
 program_must_exist "zsh"
