@@ -13,7 +13,7 @@ export LANG=C
 
 # Colors
 disable_colors() {
-    unset ALL_OFF BOLD BLUE GREEN RED YELLOW
+    unset CLR_RST CLR_BLD CLR_MAG CLR_GRN CLR_BLD_RED CLR_BLD_YLW CLR_BLD_GRN CLR_BLD_MAG
 }
 
 enable_colors() {
@@ -36,7 +36,7 @@ enable_colors() {
         CLR_BLD_YLW="${CLR_BLD}\e[33m"
         CLR_BLD_MAG="${CLR_BLD}\e[35m"
     fi
-    readonly ALL_OFF BOLD BLUE GREEN RED YELLOW
+    readonly CLR_RST CLR_BLD CLR_MAG CLR_GRN CLR_BLD_RED CLR_BLD_YLW CLR_BLD_GRN CLR_BLD_MAG
 }
 
 if [[ -t 2 ]]; then
@@ -186,15 +186,19 @@ fi
 
 # Prep for a clean build, if requested so
 if [ "${FLAG_CLEAN_BUILD}" = 'y' ]; then
-    msg "Cleaning output files left from old builds"
-    make clean"${CMD}" &>/dev/null
-    if [[ $? != 0 ]]; then
-        error "Make clean"
-        exit 1
-    else
-        success "Clean completed successfully"
+    msg "Confirm if you clean source befor buildig [y,n]?"
+    read -r CONFIRM
+    if [[ "${CONFIRM}" == "y" ]] || [[ "${CONFIRM}" == "Y" ]]; then
+        msg "Cleaning output files left from old builds"
+        make clean"${CMD}" &>/dev/null
+        if [[ $? != 0 ]]; then
+            error "Make clean"
+            exit 1
+        else
+            success "Clean completed successfully"
+        fi
+        echo -e ""
     fi
-    echo -e ""
 fi
 
 # Sync up, if asked to
