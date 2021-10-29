@@ -7,6 +7,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
+# shellcheck disable=SC2059
 
 export LC_MESSAGES=C
 export LANG=C
@@ -21,8 +22,6 @@ enable_colors() {
     if tput setaf 0 &>/dev/null; then
         CLR_RST="$(tput sgr0)"
         CLR_BLD="$(tput bold)"
-        CLR_GRN="$(tput setaf 2)"
-        CLR_MAG="$(tput setaf 5)"
         CLR_BLD_RED="${CLR_BLD}$(tput setaf 1)"
         CLR_BLD_GRN="${CLR_BLD}$(tput setaf 2)"
         CLR_BLD_YLW="${CLR_BLD}$(tput setaf 3)"
@@ -30,13 +29,12 @@ enable_colors() {
     else
         CLR_RST="\e[0m"
         CLR_BLD="\e[1m"
-        CLR_GRN="\e[32m"
         CLR_BLD_RED="${CLR_BLD}\e[31m"
         CLR_BLD_GRN="${CLR_BLD}\e[32m"
         CLR_BLD_YLW="${CLR_BLD}\e[33m"
         CLR_BLD_MAG="${CLR_BLD}\e[35m"
     fi
-    readonly CLR_RST CLR_BLD CLR_MAG CLR_GRN CLR_BLD_RED CLR_BLD_YLW CLR_BLD_GRN CLR_BLD_MAG
+    readonly CLR_RST CLR_BLD CLR_BLD_RED CLR_BLD_YLW CLR_BLD_GRN CLR_BLD_MAG
 }
 
 if [[ -t 2 ]]; then
@@ -77,8 +75,6 @@ error() {
     printf "${CLR_BLD_RED}[✘]ERROR:${CLR_RST}${CLR_BLD} ${mesg}${CLR_RST}\n" "$@" >&2
 }
 
-
-app_name='dotFile'
 [ -z "$APP_PATH" ] && APP_PATH="$HOME/.dotFile"
 [ -z "$PLUG_URI" ] && PLUG_URI="https://github.com/junegunn/vim-plug.git"
 [ -z "$PROJECT_URI" ] && PROJECT_URI="https://github.com/abdalrohman/dotFile.git"
@@ -96,14 +92,14 @@ program_exists() {
 }
 
 program_must_exist() {
-    program_exists $1
+    program_exists "$1"
 
     # throw error on non-zero return value
     if [ "$?" -ne 0 ]; then
         warning "You must have '$1' installed to continue."
         msg2 "Trying to:" "install missing tool."
         sudo DEBIAN_FRONTEND=noninteractive \
-            apt install $1 -y
+            apt install "$1" -y
     fi
 }
 
@@ -125,11 +121,11 @@ do_backup() {
         msg2 "Attempting to:" "back up your original configuration."
         today=$(date +%Y%m%d_%s)
         for i in "$1" "$2" "$3"; do
-            [ -e "$i" ] && [ ! -L "$i" ] && mv -v "$i" "$i.$today";
+            [ -e "$i" ] && [ ! -L "$i" ] && mv -v "$i" "$i.$today"
         done
         ret="$?"
         success "Your original configuration has been backed up."
-   fi
+    fi
 }
 
 sync_repo() {
@@ -187,12 +183,17 @@ TIME_START=$(date +%s.%N)
 msg "Start installation dotFile"
 echo ""
 variable_set "$HOME"
-if [ -e $HOME/.dotFile/ ]; then
-    rm -rf $HOME/.dotFile
-    sync_repo   "$HOME/.dotFile" \
-                "$PROJECT_URI" \
-                "main" \
-                "dotFile"
+if [ -e "$HOME"/.dotFile/ ]; then
+    rm -rf "$HOME"/.dotFile
+    sync_repo "$HOME/.dotFile" \
+        "$PROJECT_URI" \
+        "main" \
+        "dotFile"
+else
+    sync_repo "$HOME/.dotFile" \
+        "$PROJECT_URI" \
+        "main" \
+        "dotFile"
 fi
 
 program_must_exist "zsh"
@@ -201,22 +202,22 @@ program_must_exist "git"
 
 if [ -e "$HOME/.vim/autoload/" ]; then
     if [ -e "$HOME/.vim/autoload/.git" ]; then
-        sync_repo   "$HOME/.vim/autoload" \
-                    "$PLUG_URI" \
-                    "master" \
-                    "plug"
+        sync_repo "$HOME/.vim/autoload" \
+            "$PLUG_URI" \
+            "master" \
+            "plug"
     else
-        rm -rf $HOME/.vim/autoload
-        sync_repo   "$HOME/.vim/autoload" \
-                    "$PLUG_URI" \
-                    "master" \
-                    "plug"
+        rm -rf "$HOME"/.vim/autoload
+        sync_repo "$HOME/.vim/autoload" \
+            "$PLUG_URI" \
+            "master" \
+            "plug"
     fi
 else
-    sync_repo   "$HOME/.vim/autoload" \
-                "$PLUG_URI" \
-                "master" \
-                "plug"
+    sync_repo "$HOME/.vim/autoload" \
+        "$PLUG_URI" \
+        "master" \
+        "plug"
 fi
 
 do_backup "$HOME/.zshrc"

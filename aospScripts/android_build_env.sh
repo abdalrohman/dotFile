@@ -14,8 +14,8 @@ PACKAGES=""
 
 echo -e "\n================== Check linux version ==================\n"
 # Install lsb-core packages
-sudo apt update 
-sudo apt upgrade -y 
+sudo apt update
+sudo apt upgrade -y
 #sudo apt install lsb-core -y
 LSB_RELEASE="$(lsb_release -d | cut -d ':' -f 2 | sed -e 's/^[[:space:]]*//')"
 
@@ -45,7 +45,7 @@ sudo DEBIAN_FRONTEND=noninteractive \
     libc6-dev-i386 x11proto-core-dev libx11-dev lib32z-dev libgl1-mesa-dev \
     python-mako ninja-build syslinux syslinux-utils gettext genisoimage xorriso make git ccache \
     ${PACKAGES} -y
-    
+
 echo "Done"
 
 echo -e "\n================== Setting up udev rules for adb! ==================\n"
@@ -178,7 +178,6 @@ echo -e "\n================== SETTING UP ENV ==================\n"
 # fi
 
 # EOF
-
 
 # Add android sdk to path
 # cat <<'EOF' >> ~/.profile

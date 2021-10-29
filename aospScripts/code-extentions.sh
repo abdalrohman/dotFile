@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if command -v code &>/dev/null == 0; then
+if command -v code == 0 &>/dev/null; then
     code --install-extension 13xforever.language-x86-64-assembly
     code --install-extension aaron-bond.better-comments
     code --install-extension akamud.vscode-javascript-snippet-pack

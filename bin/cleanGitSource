@@ -1,10 +1,10 @@
 #!/bin/bash
 
 ### Abdalrohman alnassier
-### this script for clean file and folder which not part of the source 
+### this script for clean file and folder which not part of the source
 
 check_root() {
-    (( EUID == 0 )) && return
+    ((EUID == 0)) && return
     if type -P sudo >/dev/null; then
         exec sudo -- "$@"
     else
@@ -15,7 +15,10 @@ check_root() {
 check_root "$0"
 
 if [[ $(git clean -xdf --dry-run | awk '{print $NF}' | wc -l) == 0 ]]; then
-	echo "The source is clean"
+    echo "The source is clean"
 else
-	rm -rv "$(git clean -xdf --dry-run | awk '{print $NF}')"
+    list_file_for_delete="$(git clean -xdf --dry-run | awk '{print $NF}')"
+    for i in $list_file_for_delete; do
+        rm -rvf "$i"
+    done
 fi

@@ -225,7 +225,7 @@ echo -e ""
 # Lunch-time!
 if [[ "${ROM}" != "" ]] && [[ "${BUILD_TYPE}" != "" ]]; then
     msg "Lunching ${ROM}_${DEVICE}-${BUILD_TYPE} (Including dependencies sync)"
-    lunch "${ROM}_${DEVICE}-${BUILD_TYPE}" &>/dev/null
+    lunch "${ROM}_${DEVICE}-${BUILD_TYPE}"
     if [ $? -ne 0 ]; then
         error "Launching faield"
         exit 1
