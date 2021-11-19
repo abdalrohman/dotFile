@@ -120,7 +120,7 @@ echo "Done"
 
 echo -e "\n================== Installing repo ==================\n"
 sudo curl --create-dirs -L -o /usr/local/bin/repo -O -L https://storage.googleapis.com/git-repo-downloads/repo
-sudo chmod +x ~/bin/repo
+sudo chmod +x /usr/local/bin/repo
 echo "Done"
 
 # Install Git LFS
