@@ -164,7 +164,11 @@ install_android_sdk_tool() {
 }
 
 install_fzf() {
-  program_must_exist "silversearcher-ag"
+  program_exists "ag"
+  if [ "$?" -ne 0 ]; then
+    sudo DEBIAN_FRONTEND=noninteractive \
+      apt install "silversearcher-ag" -y
+  fi
   version=$(grep -m 1 "version=" "$HOME"/.dotFile/fzf/fzf/install | sed 's/.*=//')
   curl -L https://github.com/junegunn/fzf/releases/download/"$version"/fzf-"$version"-linux_arm64.tar.gz -o /tmp/fzf-"$version".tar.gz
   tar -xzf /tmp/fzf-"$version".tar.gz -C "$HOME/.dotFile/bin"
