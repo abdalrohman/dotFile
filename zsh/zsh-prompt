@@ -1,27 +1,31 @@
-# Apply different settigns for different terminals
-case $(basename "$(cat "/proc/$PPID/comm")") in
-  login)
-      source $HOME/.dotFile/zsh/zsh-maia-prompt
-    	alias x='startx ~/.xinitrc'
-    ;;
-  *)
-      if [[ $TERM == "linux" ]]; then
-        # TTY does not have powerline fonts
-        source $HOME/.dotFile/zsh/zsh-maia-prompt
+() {
+  emulate -L zsh
+
+  source $HOME/.dotFile/zsh/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme
+  source $HOME/.dotFile/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+  # Determine terminal capabilities.
+  {
+    if ! zmodload zsh/langinfo zsh/terminfo ||
+       [[ $langinfo[CODESET] != (utf|UTF)(-|)8 || $TERM == (dumb|linux) ]] ||
+       (( terminfo[colors] < 256 )); then
+      # Don't use the powerline config. It won't work on this terminal.
+      local USE_POWERLINE=false
+      # Define alias `x` if our parent process is `login`.
+      local parent
+      if { parent=$(</proc/$PPID/comm) } && [[ ${parent:t} == login ]]; then
         alias x='startx ~/.xinitrc'
-      elif [[ "$USE_POWERLINE" == "true" ]]; then
-        # Use powerline
-        source $HOME/.dotFile/zsh/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme
-        [[ ! -f $HOME/.dotFile/zsh/p10k.zsh ]] || source $HOME/.dotFile/zsh/p10k.zsh
-        source $HOME/.dotFile/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-        ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
-        ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
-      else
-        # Don't use powerline anyway
-        source $HOME/.dotFile/zsh/zsh-maia-prompt
-        source $HOME/.dotFile/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-        ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
-        ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
       fi
-    ;;
-esac
+    fi
+  } 2>/dev/null
+
+  if [[ $USE_POWERLINE == false ]]; then
+    # Use 8 colors and ASCII.
+    source $HOME/.dotFile/zsh/p10k-portable.zsh
+    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=black,bold'
+  else
+    # Use 256 colors and UNICODE.
+    source $HOME/.dotFile/zsh/p10k.zsh
+    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=244'
+  fi
+}

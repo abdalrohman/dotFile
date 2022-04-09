@@ -33,8 +33,4 @@ if [ -d "$HOME/platform-tools" ] ; then
     PATH="$HOME/platform-tools:$PATH"
 fi
 
-# Base16 Shell
-BASE16_SHELL="$HOME/.dotFile/base16-shell/base16-default.dark.sh"
-[[ -s $BASE16_SHELL ]] && source $BASE16_SHELL
-
 [ -f $HOME/.fzf.zsh ] && source $HOME/.fzf.zsh
