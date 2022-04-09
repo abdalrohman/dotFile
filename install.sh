@@ -154,11 +154,13 @@ create_symlinks() {
 }
 
 install_android_sdk_tool() {
-  msg2 "Installing android sdk"
-  curl -L https://dl.google.com/android/repository/platform-tools-latest-linux.zip -o /tmp/platform-tools.zip
-  unzip /tmp/platform-tools.zip -d ~/
-  rm /tmp/platform-tools.zip
-  success "Installing android sdk"
+  if [ ! -d "$HOME/platform-tools" ]; then
+    msg2 "Installing android sdk"
+    curl -L https://dl.google.com/android/repository/platform-tools-latest-linux.zip -o /tmp/platform-tools.zip
+    unzip /tmp/platform-tools.zip -d ~/
+    rm /tmp/platform-tools.zip
+    success "Installing android sdk"
+  fi
 }
 
 install_fzf() {
