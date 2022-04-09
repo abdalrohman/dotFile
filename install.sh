@@ -164,8 +164,10 @@ install_android_sdk_tool() {
 }
 
 install_fzf() {
-  sync_repo "$HOME/.fzf" "https://github.com/junegunn/fzf.git" "master" "fzf"
-  ~/.fzf/install
+  program_must_exist "silversearcher-ag"
+  version=$(grep -m 1 "version=" "$HOME"/.dotFile/fzf/fzf/install | sed 's/.*=//')
+  curl -L https://github.com/junegunn/fzf/releases/download/"$version"/fzf-"$version"-linux_arm64.tar.gz -o /tmp/fzf-"$version".tar.gz
+  tar -xzf /tmp/fzf-"$version".tar.gz -C "$HOME/.dotFile/bin"
 }
 
 install_dotfile() {
