@@ -181,6 +181,10 @@ install_dotfile() {
   fi
 }
 
+install_powerlevel10k() {
+  sync_repo "$HOME/.dotFile/zsh/zsh-theme-powerlevel10k" "https://github.com/romkatv/powerlevel10k.git" "master" "powerlevel10k"
+}
+
 ############################ MAIN()
 # Check the starting time (of the real build process)
 TIME_START=$(date +%s.%N)
@@ -188,6 +192,9 @@ TIME_START=$(date +%s.%N)
 msg "Start installation dotFile"
 echo ""
 install_dotfile
+
+# install p10k
+install_powerlevel10k
 
 program_must_exist "zsh"
 program_must_exist "git"
