@@ -4,12 +4,12 @@ if [[ ! "$PATH" == *"$HOME"/.dotFile/fzf/fzf/bin* ]]; then
   export PATH="${PATH:+${PATH}:}$HOME/.dotFile/fzf/fzf/bin"
 fi
 
-Auto-completion
----------------
+# Auto-completion
+# ---------------
 [[ $- == *i* ]] && source "$HOME/.dotFile/fzf/fzf/shell/completion.zsh" 2> /dev/null
 
-Key bindings
-------------
+# Key bindings
+# ------------
 source "$HOME/.dotFile/fzf/key-bindings.zsh"
 
 
