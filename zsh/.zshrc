@@ -23,3 +23,6 @@ if [ -d "$HOME/platform-tools" ] ; then
 fi
 
 [ -f $HOME/.dotFile/fzf/fzf.zsh ] && source $HOME/.dotFile/fzf/fzf.zsh
+
+# rust env
+[ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
