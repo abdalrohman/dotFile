@@ -172,6 +172,7 @@ install_fzf() {
   version=$(grep -m 1 "version=" "$HOME"/.dotFile/fzf/fzf/install | sed 's/.*=//')
   curl -L https://github.com/junegunn/fzf/releases/download/"$version"/fzf-"$version"-linux_amd64.tar.gz -o /tmp/fzf-"$version".tar.gz
   tar -xzf /tmp/fzf-"$version".tar.gz -C "$HOME/.dotFile/bin"
+  rm /tmp/fzf-"$version".tar.gz
 }
 
 install_dotfile() {
