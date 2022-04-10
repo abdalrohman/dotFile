@@ -10,7 +10,7 @@ fi
 
 # Key bindings
 # ------------
-source "$HOME/.dotFile/fzf/key-bindings.zsh"
+source "$HOME/.dotFile/fzf/fzf/shell/key-bindings.zsh"
 
 
 # Use ag for feeding into fzf for searching files.
