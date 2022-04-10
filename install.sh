@@ -170,7 +170,7 @@ install_fzf() {
       apt install "silversearcher-ag" -y
   fi
   version=$(grep -m 1 "version=" "$HOME"/.dotFile/fzf/fzf/install | sed 's/.*=//')
-  curl -L https://github.com/junegunn/fzf/releases/download/"$version"/fzf-"$version"-linux_arm64.tar.gz -o /tmp/fzf-"$version".tar.gz
+  curl -L https://github.com/junegunn/fzf/releases/download/"$version"/fzf-"$version"-linux_amd64.tar.gz -o /tmp/fzf-"$version".tar.gz
   tar -xzf /tmp/fzf-"$version".tar.gz -C "$HOME/.dotFile/bin"
 }
 
