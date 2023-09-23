@@ -1,231 +1,170 @@
 #!/usr/bin/env bash
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; version 3 of the License.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# shellcheck disable=SC2059
+#-*- coding: utf-8 -*-
+: '
+@ File Name    :   install.sh
+@ Created Time :   2021/10/29 4:08:01
 
-export LC_MESSAGES=C
-export LANG=C
+Copyright (C) <2021>  <Abdulrahman Alnaseer>
 
-# Colors
-disable_colors() {
-  unset CLR_RST CLR_BLD CLR_MAG CLR_GRN CLR_BLD_RED CLR_BLD_YLW CLR_BLD_GRN CLR_BLD_MAG
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'
+# Set locale environment variables
+export LC_MESSAGES=C LANG=C
+
+# Function to set color variables
+set_colors() {
+    if tput setaf 0 &>/dev/null; then
+        CLR_RST="$(tput sgr0)"
+        CLR_BLD="$(tput bold)"
+        CLR_BLD_RED="${CLR_BLD}$(tput setaf 1)"
+        CLR_BLD_GRN="${CLR_BLD}$(tput setaf 2)"
+        CLR_BLD_YLW="${CLR_BLD}$(tput setaf 3)"
+        CLR_BLD_MAG="${CLR_BLD}$(tput setaf 5)"
+    else
+        unset CLR_RST CLR_BLD CLR_BLD_RED CLR_BLD_YLW CLR_BLD_GRN CLR_BLD_MAG
+    fi
 }
 
-enable_colors() {
-  # prefer terminal safe colored and bold text when tput is supported
-  if tput setaf 0 &>/dev/null; then
-    CLR_RST="$(tput sgr0)"
-    CLR_BLD="$(tput bold)"
-    CLR_BLD_RED="${CLR_BLD}$(tput setaf 1)"
-    CLR_BLD_GRN="${CLR_BLD}$(tput setaf 2)"
-    CLR_BLD_YLW="${CLR_BLD}$(tput setaf 3)"
-    CLR_BLD_MAG="${CLR_BLD}$(tput setaf 5)"
-  else
-    CLR_RST="\e[0m"
-    CLR_BLD="\e[1m"
-    CLR_BLD_RED="${CLR_BLD}\e[31m"
-    CLR_BLD_GRN="${CLR_BLD}\e[32m"
-    CLR_BLD_YLW="${CLR_BLD}\e[33m"
-    CLR_BLD_MAG="${CLR_BLD}\e[35m"
-  fi
-  readonly CLR_RST CLR_BLD CLR_BLD_RED CLR_BLD_YLW CLR_BLD_GRN CLR_BLD_MAG
+# Check if standard error is a terminal and set color variables
+[[ -t 2 ]] && set_colors
+
+# Function to print a message
+print_msg() {
+    local color=$1 mesg=$2
+    shift 2
+    printf "${!color}${mesg}${CLR_RST}\n" "$@" >&2
 }
 
-if [[ -t 2 ]]; then
-  enable_colors
-else
-  disable_colors
-fi
+# Define message functions
+msg() { print_msg CLR_BLD_MAG "$@"; }
+msg2() { print_msg CLR_BLD_GRN "==> $1 ${CLR_BLD}$2" "${@:3}"; }
+warning() { print_msg CLR_BLD_YLW "[!]WARNING: ${CLR_BLD}$1" "${@:2}"; }
+success() { print_msg CLR_BLD_GRN "[✔]SUCCESS: ${CLR_BLD}$1" "${@:2}"; }
+error() { print_msg CLR_BLD_RED "[✘]ERROR: ${CLR_BLD}$1" "${@:2}"; }
 
-# Set functions
-msg() {
-  local mesg=$1
-  shift
-  printf "${CLR_BLD_MAG}${mesg}${CLR_RST}\n" "$@" >&2
-}
+# Set default values for APP_PATH and PROJECT_URI if they are not set
+: "${APP_PATH:="$HOME/.dotFile"}"
+: "${PROJECT_URI:="https://github.com/abdalrohman/dotFile.git"}"
 
-msg2() {
-  local val=$1
-  local mesg=$2
-  shift
-  printf "${CLR_BLD_GRN}==> ${val}${CLR_RST}${CLR_BLD} ${mesg}\n" "$@" >&2
-}
-
-warning() {
-  local mesg=$1
-  shift
-  printf "${CLR_BLD_YLW}[!]WARNING:${CLR_RST}${CLR_BLD} ${mesg}${CLR_RST}\n" "$@" >&2
-}
-
-success() {
-  local mesg=$1
-  shift
-  printf "${CLR_BLD_GRN}[✔]SUCCESS:${CLR_RST}${CLR_BLD} ${mesg}${CLR_RST}\n" "$@" >&2
-}
-
-error() {
-  local mesg=$1
-  shift
-  printf "${CLR_BLD_RED}[✘]ERROR:${CLR_RST}${CLR_BLD} ${mesg}${CLR_RST}\n" "$@" >&2
-}
-
-[ -z "$APP_PATH" ] && APP_PATH="$HOME/.dotFile"
-[ -z "$PROJECT_URI" ] && PROJECT_URI="https://github.com/abdalrohman/dotFile.git"
-
-program_exists() {
-  local ret='0'
-  command -v "$1" >/dev/null 2>&1 || { local ret='1'; }
-
-  # fail on non-zero return value
-  if [ "$ret" -ne 0 ]; then
-    return 1
-  fi
-
-  return 0
-}
-
+# Function to ensure a program must exist
 program_must_exist() {
-  program_exists "$1"
-
-  # throw error on non-zero return value
-  if [ "$?" -ne 0 ]; then
-    warning "You must have '$1' installed to continue."
-    msg2 "Trying to:" "install missing tool."
-    sudo DEBIAN_FRONTEND=noninteractive \
-      apt install "$1" -y
-  fi
+    command -v "$1" >/dev/null 2>&1 || {
+        warning "You must have '$1' installed to continue."
+        msg2 "INFO" "Trying to install missing tool."
+        sudo DEBIAN_FRONTEND=noninteractive apt install "$1" -y
+    }
 }
 
+# Function to create a symbolic link if the source file exists
 lnif() {
-  if [ -e "$1" ]; then
-    ln -sf "$1" "$2"
-  fi
-  ret="$?"
+    [ -e "$1" ] && ln -sf "$1" "$2"
 }
 
+# Function to backup existing files
 do_backup() {
-  if [ -e "$1" ] || [ -e "$2" ] || [ -e "$3" ]; then
-    msg2 "Attempting to:" "back up your original configuration."
-    today=$(date +%Y%m%d_%s)
-    for i in "$1" "$2" "$3"; do
-      [ -e "$i" ] && [ ! -L "$i" ] && mv -v "$i" "$i.$today"
+    local today=$(date +%Y%m%d_%s)
+    for file in "$@"; do
+        [ -e "$file" ] && [ ! -L "$file" ] && mv -v "$file" "$file.$today"
     done
-    ret="$?"
     success "Your original configuration has been backed up."
-  fi
 }
 
+# Function to sync a git repository
 sync_repo() {
-  local repo_path="$1"
-  local repo_uri="$2"
-  local repo_branch="$3"
-  local repo_name="$4"
+    local repo_path="$1"
+    local repo_uri="$2"
+    local repo_branch="$3"
+    local repo_name="$4"
 
-  msg2 "Trying to:" "update $repo_name"
+    msg2 "INFO" "Trying to update $repo_name"
 
-  if [ ! -e "$repo_path" ]; then
-    mkdir -p "$repo_path"
-    git clone --recurse-submodules --depth 1 -b "$repo_branch" "$repo_uri" "$repo_path"
-    ret="$?"
-    success "Successfully cloned $repo_name."
-  else
-    cd "$repo_path" && git pull origin "$repo_branch"
-    ret="$?"
-    success "Successfully updated $repo_name"
-  fi
+    if [ ! -e "$repo_path" ]; then
+        mkdir -p "$repo_path"
+        git clone --recurse-submodules --depth 1 -b "$repo_branch" "$repo_uri" "$repo_path"
+        success "Successfully cloned $repo_name."
+    else
+        cd "$repo_path" && git pull origin "$repo_branch"
+        success "Successfully updated $repo_name"
+    fi
 }
 
+# Function to create symbolic links
 create_symlinks() {
-  local source_path="$1"
-  local target_path="$2"
-  msg2 "Creat:" "symlinks."
+    local source_path="$1"
+    local target_path="$2"
 
-  lnif "$source_path/zsh/.zshrc" "$target_path/.zshrc"
-  lnif "$source_path/vim/.vimrc" "$target_path/.vimrc"
+    lnif "$source_path/zsh/.zshrc" "$target_path/.zshrc"
+    lnif "$source_path/vim/.vimrc" "$target_path/.vimrc"
 
-  ret="$?"
-  success "Setting up symlinks."
+    success "Setting up symlinks."
 }
 
+# Function to install android sdk tool
 install_android_sdk_tool() {
-  if [ ! -d "$HOME/platform-tools" ]; then
-    msg2 "Installing android sdk"
-    curl -L https://dl.google.com/android/repository/platform-tools-latest-linux.zip -o /tmp/platform-tools.zip
-    unzip /tmp/platform-tools.zip -d ~/
-    rm /tmp/platform-tools.zip
-    success "Installing android sdk"
-  fi
+    if [ ! -d "$HOME/platform-tools" ]; then
+        msg2 "INFO" "Installing android sdk"
+        curl -L https://dl.google.com/android/repository/platform-tools-latest-linux.zip -o /tmp/platform-tools.zip
+        unzip /tmp/platform-tools.zip -d ~/
+        rm /tmp/platform-tools.zip
+        success "Installing android sdk"
+    fi
 }
 
+# Function to install fzf
 install_fzf() {
-  program_exists "ag"
-  if [ "$?" -ne 0 ]; then
-    sudo DEBIAN_FRONTEND=noninteractive \
-      apt install "silversearcher-ag" -y
-  fi
-  version=$(grep -m 1 "version=" "$HOME"/.dotFile/fzf/fzf/install | sed 's/.*=//')
-  curl -L https://github.com/junegunn/fzf/releases/download/"$version"/fzf-"$version"-linux_amd64.tar.gz -o /tmp/fzf-"$version".tar.gz
-  tar -xzf /tmp/fzf-"$version".tar.gz -C "$HOME/.dotFile/bin"
-  rm /tmp/fzf-"$version".tar.gz
+    local version=$(grep -m 1 "version=" "$HOME"/.dotFile/fzf/fzf/install | tr -d '\r' | sed 's/.*=//')
+    curl -L https://github.com/junegunn/fzf/releases/download/"$version"/fzf-"$version"-linux_amd64.tar.gz -o /tmp/fzf-"$version".tar.gz
+    tar -xzf /tmp/fzf-"$version".tar.gz -C "$HOME/.dotFile/bin"
+    rm /tmp/fzf-"$version".tar.gz
 }
 
+# Function to install dotfile
 install_dotfile() {
-  if [ -e "$HOME"/.dotFile/ ]; then
-    rm -rf "$HOME"/.dotFile
-    sync_repo "$HOME/.dotFile" \
-      "$PROJECT_URI" \
-      "dev" \
-      "dotFile"
-  else
-    sync_repo "$HOME/.dotFile" \
-      "$PROJECT_URI" \
-      "dev" \
-      "dotFile"
-  fi
+    sync_repo "$HOME/.dotFile" "$PROJECT_URI" "dev" "dotFile"
 }
 
+# Function to install powerlevel10k
 install_powerlevel10k() {
-  sync_repo "$HOME/.dotFile/zsh/zsh-theme-powerlevel10k" "https://github.com/romkatv/powerlevel10k.git" "master" "powerlevel10k"
+    sync_repo "$HOME/.dotFile/zsh/zsh-theme-powerlevel10k" "https://github.com/romkatv/powerlevel10k.git" "master" "powerlevel10k"
 }
 
-############################ MAIN()
-# Check the starting time (of the real build process)
-TIME_START=$(date +%s.%N)
+# Main function
+main() {
+    msg "Start installation dotFile"
+    echo ""
 
-msg "Start installation dotFile"
-echo ""
-install_dotfile
+    program_must_exist "zsh"
+    program_must_exist "git"
+    program_must_exist "bc"
+    program_must_exist "silversearcher-ag"
+    program_must_exist "unzip"
 
-# install p10k
-install_powerlevel10k
+    install_dotfile
+    install_powerlevel10k
 
-program_must_exist "zsh"
-program_must_exist "git"
+    chsh "$USER" -s /bin/zsh
 
-# change current shell to zsh
-chsh "$USER" -s /bin/zsh
+    install_fzf
+    install_android_sdk_tool
 
-# install fzf
-install_fzf
+    do_backup "$HOME/.zshrc"
 
-#instal android sdk
-install_android_sdk_tool
+    create_symlinks "$APP_PATH" "$HOME"
 
-do_backup "$HOME/.zshrc"
+    msg "Total time elapsed: $(echo "($(date +%s.%N) - $SECONDS) / 60" | bc) minutes ($(echo "$(date +%s.%N) - $SECONDS" | bc) seconds)"
+    echo ""
+}
 
-create_symlinks "$APP_PATH" "$HOME"
-
-# Check the finishing time
-TIME_END=$(date +%s.%N)
-
-# Log those times at the end
-msg "Total time elapsed: $(echo "(${TIME_END} - ${TIME_START}) / 60" | bc) minutes ($(echo "${TIME_END} - ${TIME_START}" | bc) seconds)"
-echo -e ""
-
-exit 0
+# Run the main function
+main

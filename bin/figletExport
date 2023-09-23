@@ -1,37 +1,80 @@
-#!/bin/bash
+#!/usr/bin/env bash
+#-*- coding: utf-8 -*-
+: '
+@ File Name    :   figletExport
+@ Created Time :   2021/06/01 6:26
 
-####################################################################################################
-#Script Name	:
-# ███████╗██╗ ██████╗ ██╗     ███████╗████████╗███████╗██╗  ██╗██████╗  ██████╗ ██████╗ ████████╗
-# ██╔════╝██║██╔════╝ ██║     ██╔════╝╚══██╔══╝██╔════╝╚██╗██╔╝██╔══██╗██╔═══██╗██╔══██╗╚══██╔══╝
-# █████╗  ██║██║  ███╗██║     █████╗     ██║   █████╗   ╚███╔╝ ██████╔╝██║   ██║██████╔╝   ██║   
-# ██╔══╝  ██║██║   ██║██║     ██╔══╝     ██║   ██╔══╝   ██╔██╗ ██╔═══╝ ██║   ██║██╔══██╗   ██║   
-# ██║     ██║╚██████╔╝███████╗███████╗   ██║   ███████╗██╔╝ ██╗██║     ╚██████╔╝██║  ██║   ██║   
-# ╚═╝     ╚═╝ ╚═════╝ ╚══════╝╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝   
-                                                                              
-#Description	:Export input name to  file with all figlet fonts                                                                                                                                                                
-#Author       	:Abdalrohman alnassier                                               
-#Email         	:abdd199719@gmail.com                                          
-####################################################################################################
+Copyright (C) <2021>  <Abdulrahman Alnaseer>
 
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-if [ $(command -v figlet) ]; then
-	read -p "Enter text: " TEXT
-	OUTPUT="$TEXT.output"
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-	for fontname in ../figlet-fonts/*.flf; do
-		figlet -f "$fontname" "${TEXT}" 
-		echo "Font name: $(basename "$fontname" .flf)"
-	done > $OUTPUT
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'
+# Function to install a program if it's not installed
+install_program() {
+    local program=$1
 
-	for fontname in ../figlet-fonts/*.tlf; do
-		figlet -f "$fontname" "${TEXT}" 
-		echo "Font name: $(basename "$fontname" .tlf)"
-	done >> $OUTPUT
-else
-	sudo DEBIAN_FRONTEND=noninteractive apt install figlet
-	if [ $(command -v figlet) ]; then
-		echo ""
-		echo "\e[0;31mRun script again.\e[m"
-	fi
-fi
+    if ! command -v $program >/dev/null 2>&1; then
+        echo "$program is not installed. Installing..."
+
+        # Check if the system is Ubuntu or Arch Linux
+        if command -v apt >/dev/null 2>&1; then
+            # Ubuntu
+            sudo apt update && sudo apt install $program -y
+        elif command -v pacman >/dev/null 2>&1; then
+            # Arch Linux
+            sudo pacman -Syu $program --noconfirm
+        else
+            echo "Unsupported system. Please install $program manually."
+            exit 1
+        fi
+    else
+        echo "$program is already installed."
+    fi
+}
+
+# Function to generate figlet text with all available fonts
+generate_figlet_text() {
+    local text=$1
+    local output_file=$2
+
+    # Get the directory of the script
+    SCRIPT_DIR=$(dirname "$0")
+
+    # Loop over all .flf font files
+    for fontname in "$SCRIPT_DIR"/figlet-fonts/*.flf; do
+        figlet -f "$fontname" "${text}"
+        echo "Font name: $(basename "$fontname" .flf)"
+    done >$output_file
+
+    # Loop over all .tlf font files
+    for fontname in "$SCRIPT_DIR"/figlet-fonts/*.tlf; do
+        figlet -f "$fontname" "${text}"
+        echo "Font name: $(basename "$fontname" .tlf)"
+    done >>$output_file
+}
+
+# Main function
+main() {
+    # Install figlet if it's not installed
+    install_program figlet
+
+    # Prompt the user for input
+    read -p "Enter text: " TEXT
+    OUTPUT="$TEXT.output"
+
+    # Generate figlet text with all available fonts
+    generate_figlet_text "$TEXT" "$OUTPUT"
+}
+
+# Run the main function
+main

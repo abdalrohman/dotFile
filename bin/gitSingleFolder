@@ -1,6 +1,70 @@
 #!/usr/bin/env bash
-# downlode single folder from github 
-# change https://github.com/lodash/lodash/tree/master/test 
-# to https://github.com/lodash/lodash/trunk/test
-# https://stackoverflow.com/questions/7106012/download-a-single-folder-or-directory-from-a-github-repo#:~:text=Step1%3A%20Input%20github%20url%20to,File%22%20button%20to%20get%20files.
-svn checkout "$1"
+#-*- coding: utf-8 -*-
+: '
+@ File Name    :   gitSingleFolder
+@ Created Time :   2021/06/01 6:26
+
+Copyright (C) <2021>  <Abdulrahman Alnaseer>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'
+
+# Check if svn is installed
+if ! command -v svn >/dev/null 2>&1; then
+    echo "svn is not installed. Installing..."
+
+    # Check if the system is Ubuntu or Arch Linux
+    if command -v apt >/dev/null 2>&1; then
+        # Ubuntu
+        sudo apt update && sudo apt install subversion -y
+    elif command -v pacman >/dev/null 2>&1; then
+        # Arch Linux
+        sudo pacman -Syu subversion --noconfirm
+    else
+        echo "Unsupported system. Please install svn manually."
+    fi
+else
+    echo "svn is already installed."
+fi
+
+# Function to download a single folder from a GitHub repo
+download_github_folder() {
+    local repo_url=$1
+
+    # Check if the URL is a GitHub URL
+    if [[ $repo_url == https://github.com/* ]]; then
+        # Convert the GitHub URL to the SVN URL format
+        local svn_url=${repo_url/tree/trunk}
+
+        # Download the folder using SVN
+        svn checkout "$svn_url"
+    else
+        echo "Invalid GitHub URL. Please provide a valid GitHub URL."
+    fi
+}
+
+# Main function
+main() {
+    # Check if a URL is provided
+    if [[ $# -eq 0 ]]; then
+        echo "Please provide a GitHub URL."
+        exit 1
+    fi
+
+    # Download the GitHub folder
+    download_github_folder "$1"
+}
+
+# Run the main function with the provided arguments
+main "$@"

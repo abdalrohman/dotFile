@@ -1,16 +1,65 @@
 #!/usr/bin/env zsh
+#-*- coding: utf-8 -*-
+: '
+@ File Name    :   zshHistoryFix
+@ Created Time :   2021/06/01 6:26
 
-FILE_NAME="${1}"
-BACKUP_FILE="${2}"
+Copyright (C) <2021>  <Abdulrahman Alnaseer>
 
-if [[ -e $FILE_NAME ]]; then
-    echo "Rename ${FILE_NAME} to ${BACKUP_FILE}"
-    mv "${FILE_NAME}" "${BACKUP_FILE}"
-    strings "${BACKUP_FILE}" > "${FILE_NAME}"
-    fc -R "${FILE_NAME}"
-    if [[ -e $FILE_NAME ]]; then
-        rm -rvf "${BACKUP_FILE}"
-    fi 
-else 
-    echo "Usage: ${0##*/} <filename> <backupfile>"
-fi
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'
+
+# Function to backup and clean a file
+backup_and_clean_file() {
+    local file_name=$1
+    local backup_file=$2
+
+    # Check if the file exists
+    if [[ -e $file_name ]]; then
+        echo "Renaming ${file_name} to ${backup_file}"
+
+        # Rename the file to the backup file
+        mv "${file_name}" "${backup_file}"
+
+        # Remove non-printable characters from the backup file and save it to the original file
+        strings "${backup_file}" >"${file_name}"
+
+        # Read the commands from the cleaned file into the history list
+        fc -R "${file_name}"
+
+        # If the cleaned file exists, remove the backup file
+        if [[ -e $file_name ]]; then
+            rm -rvf "${backup_file}"
+        fi
+    else
+        echo "Error: File ${file_name} does not exist."
+        echo "Usage: ${0##*/} <filename> <backupfile>"
+    fi
+}
+
+# Main function
+main() {
+    # Check if the correct number of arguments are provided
+    if [[ $# -ne 2 ]]; then
+        echo "Error: Incorrect number of arguments."
+        echo "Usage: ${0##*/} <filename> <backupfile>"
+        exit 1
+    fi
+
+    # Backup and clean the file
+    backup_and_clean_file "$1" "$2"
+}
+
+# Run the main function with the provided arguments
+main "$@"
